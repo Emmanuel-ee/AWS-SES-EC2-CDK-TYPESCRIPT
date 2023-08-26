@@ -1,0 +1,9 @@
+POST http://localhost:3000/api/donate
+Content-Type: application/json
+
+{
+"email": "ememeemmanuel3@gmail.com",
+"name": "emmanuel",
+"donations": 100
+}
+####

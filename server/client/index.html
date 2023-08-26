@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="style.css"/>
+  <title>Donation Form</title>
+</head>
+<body>
+  <div class="container">
+    <h1>Donation Form</h1>
+    <form id="donationForm">
+      <input type="text" id="name" placeholder="Name" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="number" id="donations" placeholder="Donation Amount" required>
+      <button type="submit">Donate</button>
+    </form>
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const donationForm = document.getElementById("donationForm");
+
+      donationForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const donations = parseInt(document.getElementById("donations").value);
+
+        const response = await fetch("http://localhost:3000/api/donate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name, email, donations }),
+        });
+
+        if (response.ok) {
+          alert("Donation received!");
+          donationForm.reset();
+        } else {
+          alert("An error occurred while processing your donation.");
+        }
+      });
+    });
+  </script>
+</body>
+</html>

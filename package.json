@@ -8,6 +8,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
+    "install-server": "npm install --prefix server",
+    "test-server": "npm run test --prefix server",
     "cdk": "cdk"
   },
   "devDependencies": {
