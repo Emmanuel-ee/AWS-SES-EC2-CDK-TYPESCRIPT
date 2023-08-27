@@ -28,12 +28,16 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - run: npm run install-server
-      - run: npm run test-server
+      - name: Install server dependencies
+        run: npm install-server
 
-      # Additional steps for CDK deployment
+      - name: Test server logic
+        run: npm run test-server
+
       - name: Install AWS CDK
-        run: npm install -g aws-cdk
+        run: |
+          npm install
+          npm install -g aws-cdk
 
       - name: CDK Deploy
         run: cdk deploy --all --require-approval never
