@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - run: npm install-server
+      - run: npm run install-server
       - run: npm run test-server
 
       # Additional steps for CDK deployment
