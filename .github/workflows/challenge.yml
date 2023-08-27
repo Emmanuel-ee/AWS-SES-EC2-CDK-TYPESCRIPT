@@ -28,31 +28,35 @@ jobs:
       - run: npm run install-server
       #test server logic
       - run: npm run test-server
-      #test infrastructure as code
-      - run: npm run test
-# Deploy to aws
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
 
-    env:
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      # Install AWS CLI for deploying CDK
+      - name: Configure AWS credentials
+        run: |
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${AWS_ACCESS_KEY_ID}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}" >> ~/.aws/credentials
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+          aws --version
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 18 # Use the appropriate Node.js version
+      - name: CDK Deploy
+        run: |
+          npm install -g aws-cdk
+          npm install
+          cdk deploy --all --require-approval never
 
-      - name: Install CDK dependencies
-        run: npm install -g aws-cdk
+      - name: Send Deployment Notification
+        run: |
+          aws ses send-email \
+            --region ${{ env.AWS_REGION }} \
+            --from ${{ secrets.SENDER_EMAIL }} \
+            --destination "ToAddresses=${{ secrets.RECIPIENT_EMAIL }}" \
+            --message "Subject={Data=CDK Deployment Notification,Charset=utf-8},Body={Text={Data=CDK stack has been deployed successfully.,Charset=utf-8},Html={Data=<p>CDK stack has been deployed successfully.</p>,Charset=utf-8}}" \
+            --profile default
 
-      - name: Deploy CDK application
-        run: cdk deploy --require-approval never # Modify this command as per your CDK app
 
-# Additional steps can be added here, such as notifications or environment setup.
+
