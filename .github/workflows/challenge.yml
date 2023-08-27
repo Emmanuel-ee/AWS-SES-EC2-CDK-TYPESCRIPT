@@ -23,13 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Create AWS credentials file
-        run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${AWS_ACCESS_KEY_ID}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}" >> ~/.aws/credentials
-
       - name: Install Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
@@ -46,10 +39,17 @@ jobs:
           sudo ./aws/install
           aws --version
 
-      - name: CDK Deploy
+      - name: Configure AWS credentials
         run: |
-          npm install -g aws-cdk
-          cdk deploy --all --require-approval never
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ${{ secrets.AWS_REGION }}
+
+      - name: Install AWS CDK
+        run: npm install -g aws-cdk
+
+      - name: CDK Deploy
+        run: cdk deploy --all --require-approval never
 
       - name: Send Deployment Notification
         run: |
