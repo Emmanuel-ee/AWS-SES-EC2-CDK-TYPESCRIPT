@@ -7,14 +7,12 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test:
-    name: Build and Test
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-
+  build:
     strategy:
       matrix:
         node-version: [18.x, 16.x]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -24,46 +22,29 @@ jobs:
       PORT: ${{ secrets.PORT }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
       - name: Install Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install server dependencies
-        run: npm run install-server
+      - run: npm run install-server
+      - run: npm run test-server
 
-      - name: Test server
-        run: npm run test-server
+      # Additional steps for CDK deployment
+      # - name: Install AWS CDK
+      - run: npm install
+      - run: npm install -g aws-cdk
+      - run: cdk bootstrap
+      - name: CDK Deploy
 
-  deploy:
-    name: Deploy CDK Stacks
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install cdk dependencies
-        run: npm install
-
-      - name: Install AWS CDK
-        run: npm install -g aws-cdk
-
-      - name: Bootstrap CDK environment
-        run: cdk bootstrap
-
-      - name: Deploy CDK stacks
         run: cdk deploy --all --require-approval never
 
       - name: Send Deployment Notification
         run: |
           aws ses send-email \
-            --region ${{ secrets.AWS_REGION }} \
+            --region ${{ env.AWS_REGION }} \
             --from ${{ secrets.SENDER_EMAIL }} \
             --destination "ToAddresses=${{ secrets.RECIPIENT_EMAIL }}" \
             --message "Subject={Data=CDK Deployment Notification,Charset=utf-8},Body={Text={Data=CDK stack has been deployed successfully.,Charset=utf-8},Html={Data=<p>CDK stack has been deployed successfully.</p>,Charset=utf-8}}" \
