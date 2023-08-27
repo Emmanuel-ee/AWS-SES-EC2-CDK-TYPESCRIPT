@@ -1,8 +1,13 @@
-# cd ~
-# wget https://github.com/cdk-entest/vpc-sg-ec2-demo/archive/refs/heads/main.zip
-# unzip main.zip
-# cd vpc-sg-ec2-demo-main
-# cd web
-# python3 -m pip install --user -r requirements.txt
-# python3 -m app
+sudo yum -y update && sudo yum -y install httpd
+sudo systemctl start httpd && sudo systemctl enable httpd
+sudo echo "<h1>Deployed via Terraform</h1>" > /var/www/html/index.html
 
+# sudo yum -y install docker
+# sudo systemctl start docker
+# sudo usermod -aG docker ec2-user
+# sudo docker container run -d -p 8080:80 nginx
+
+sudo yum -y install docker
+sudo systemctl start docker
+sudo usermod -aG docker ec2-user
+sudo docker container run -d -p 8080:3000 ememeemmanuel3/aws-ses-server
