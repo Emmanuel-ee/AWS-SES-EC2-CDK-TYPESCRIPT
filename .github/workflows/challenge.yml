@@ -39,6 +39,7 @@ jobs:
         run: npm run test-server
 
   aws_cdk:
+    needs: build  # This ensures the aws_cdk job depends on the build job
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
