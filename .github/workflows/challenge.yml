@@ -26,3 +26,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm run install-server
       - run: npm run test-server
+
+      # Continuous deployment
+
+      
+      

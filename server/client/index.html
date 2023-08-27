@@ -27,7 +27,7 @@
         const email = document.getElementById("email").value;
         const donations = parseInt(document.getElementById("donations").value);
 
-        const response = await fetch("http://localhost:8080/api/donate", {
+        const response = await fetch("/api/donate", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

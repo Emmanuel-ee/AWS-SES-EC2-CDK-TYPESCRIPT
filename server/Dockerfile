@@ -14,4 +14,4 @@ USER node
 
 CMD ["npm", "run", "dev"]
 
-EXPOSE 8000
+EXPOSE 80

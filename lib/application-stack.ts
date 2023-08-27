@@ -23,11 +23,11 @@ export class ApplicationStack extends Stack {
       "open port 80 for http"
     );
 
-    sg.addIngressRule(
-      aws_ec2.Peer.anyIpv4(),
-      aws_ec2.Port.tcp(8080),
-      "open port 8080 for ses server docker"
-    );
+    // sg.addIngressRule(
+    //   aws_ec2.Peer.anyIpv4(),
+    //   aws_ec2.Port.tcp(8080),
+    //   "open port 8080 for ses server docker"
+    // );
 
     sg.addIngressRule(
       aws_ec2.Peer.anyIpv4(),
