@@ -4,12 +4,13 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+
 jobs:
   build:
     strategy:
       matrix:
         node-version: [18.x, 16.x]
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -19,15 +20,39 @@ jobs:
       PORT: ${{ secrets.PORT }}
 
     steps:
-      - uses: actions/checkout@v2 # checkout the latest version of our code from github
+      - uses: actions/checkout@v2
       - name: Use Node.js version ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm run install-server
+      #test server logic
       - run: npm run test-server
+      #test infrastructure as code
+      - run: npm run test
+# Deploy to aws
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
 
-      # Continuous deployment
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      
-      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18 # Use the appropriate Node.js version
+
+      - name: Install CDK dependencies
+        run: npm install -g aws-cdk
+
+      - name: Deploy CDK application
+        run: cdk deploy --require-approval never # Modify this command as per your CDK app
+
+# Additional steps can be added here, such as notifications or environment setup.
