@@ -2,9 +2,11 @@ name: Test CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   build:
@@ -22,12 +24,49 @@ jobs:
       PORT: ${{ secrets.PORT }}
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Install Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
 
-      - run: npm run install-server
-      - run: npm run test-server
+      - name: Install server dependencies
+        run: npm run install-server
+
+      - name: Run server tests
+        run: npm run test-server
+
+  aws_cdk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+    
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: "npm"
+    
+      - name: Install dependencies
+        run: npm install
+    
+      - name: Install AWS CDK
+        run: npm i -g aws-cdk
+    
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+    
+      - name: Synthesize stack
+        run: cdk synth
+    
+      - name: Deploy stack
+        run: cdk deploy --all --require-approval never
